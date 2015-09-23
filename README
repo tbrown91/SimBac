@@ -1,0 +1,40 @@
+SimBac README
+
+To compile SimBac, change to the directory with the source files and run:
+
+g++ *.cpp -lgsl -lgslcblas -lm -O2 -o SimBac
+
+To view the options to be passed to SimBac, run without any arguments or with the "-h" flag:
+
+./SimBac
+./SimBac -h
+
+    -N NUM Sets the number of isolates (default is 100)
+    -R NUM Sets the value of θ, the site-specific mutation rate, between 0 and 1 (default is 0.01)
+    -m NUM Sets the lower bound of site-mutation (divergence) in a region of external recombination, between 0 and 1 (default is 0)
+    -M NUM Sets the upper bound of site-mutation (divergence) in a region of external recombination, between 0 and 1 (default is 0)
+    -R NUM Sets the rate of internal (within species) recombination, ρ_i , between 0 and 1 (default is 0.01)
+    -r NUM Sets the rate of external (between species) recombination, ρ_e , between 0 and 1 (default is 0)
+    -D NUM Sets the average length of an internal recombinant interval, δ_i (default is 500)
+    -e NUM Sets the average length of an external recombinant interval, δ_e (default is 500)
+    -B NUM,. . .,NUM Sets the number and lengths of fragments of genetic material (default is 10000)
+    -G NUM,. . .,NUM Sets the size of gaps between each fragment, must be the same number of gaps as there are numbers of genetic fragments (default is 0,. . .,0)
+    -s NUM Use given seed to initiate random number generation
+    -o FILE Name of file to write generated sequences (FASTA format)
+    -c FILE Name of file to write clonal genealogy (Newick format)
+    -l FILE Name of file to write local trees (Newick format)
+    -b FILE Name of file to write log of internal recombination breaks
+    -f FILE Name of file to write log of external recombination breaks
+    -d FILE Name of file to export ancestral recombination graph (DOT file)
+    -a Include ancestral material in the DOT graph
+
+
+For example, to simulate a population of 100 isolates with genome length 1Mb and rho = 1%, theta = 1% run:
+
+./SimBac -N 100 -B 1000000 -R 0.01 -T 0.01 -o genomes.fasta -c clonal_frame.nwk
+
+Linear genomes can be approximated by placing a large gap at the end of the ancestral block. For example, to simulate a linear genome of length 100kb, run:
+
+./SimBac -N 100 -B 100000 -G 1000000 -o genomes.fasta -c clonal_frame.nwk
+
+This places a gap of length 1Mb after the genome, meaning recombinant intervals cannot include both the first and last element of the genome.
