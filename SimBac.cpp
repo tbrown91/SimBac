@@ -109,7 +109,6 @@ int main(int argc, char *argv[]) {
     if (gaps.size() != blocks.size()-1) {cout << "Wrong number of gaps given (must be same as number of blocks)" << endl;return 1;}
 
     double theta = theta_site * blocks.back();
-    cout << theta << endl;
 
     if (argc-optind>0) {cout<<"Wrong arguments."<<endl<<help<<endl;return 1;}
     //Build the ARG
