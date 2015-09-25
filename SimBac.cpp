@@ -27,8 +27,8 @@ static const char * help=
     -T NUM   Sets the value of theta, between 0 and 1 (default is 0.01))\n\
     -m NUM   Sets the minimum probability of mutation in an interval of external recombination between 0 & 1 (default is 0)\n\
     -M NUM   Sets the maximum probability of mutation in an interval of external recombination between 0 & 1 (default is 0)\n\
-    -R NUM   Sets the value of rho, between 0 and 1 (default is 0.01)\n\
-    -r NUM   Sets the rate of rho external, between 0 and 1 (default is 0)\n\
+    -R NUM   Sets the value of R, the site-specific internal recombination rate (default is 0.01)\n\
+    -r NUM   Sets the rate of R external, the site-specific rate of external recombination (default is 0)\n\
     -D NUM   Sets the value of delta (default is 500)\n\
     -e NUM   Sets the average length of external recombinant interval (default is 500)\n\
     -B NUM,...,NUM Sets the number and length of the fragments\n\
