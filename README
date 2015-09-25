@@ -29,15 +29,15 @@ To view the options to be passed to SimBac, run without any arguments or with th
     -a Include ancestral material in the DOT graph
 
 
-For example, to simulate a population of 100 isolates with genome length 1Mb and rho = 1%, theta = 1% run:
+For example, to simulate a population of 100 isolates with genome length 1Mbp and R=0.01, θ = 0.01 run:
 
 ./SimBac -N 100 -B 1000000 -R 0.01 -T 0.01 -o genomes.fasta -c clonal_frame.nwk
 
-Linear genomes can be approximated by placing a large gap at the end of the ancestral block. For example, to simulate a linear genome of length 100kb, run:
+Linear genomes can be approximated by placing a large gap at the end of the ancestral block. For example, to simulate a linear genome of length 100kbp, run:
 
 ./SimBac -N 100 -B 100000 -G 1000000 -o genomes.fasta -c clonal_frame.nwk
 
-This places a gap of length 1Mb after the genome, meaning recombinant intervals cannot include both the first and last element of the genome.
+This places a gap of length 1Mbp after the genome, meaning recombinant intervals cannot include both the first and last element of the genome.
 
 
 Supplemantary information with a manual and technical description can be found here:
