@@ -29,7 +29,7 @@ To view the options to be passed to SimBac, run without any arguments or with th
     -a Include ancestral material in the DOT graph
 
 
-For example, to simulate a population of 100 isolates with genome length 1Mbp and R=0.01, θ = 0.01 run:
+For example, to simulate a population of 100 isolates with genome length 1Mbp and R=0.01, θ=0.01 run:
 
 ./SimBac -N 100 -B 1000000 -R 0.01 -T 0.01 -o genomes.fasta -c clonal_frame.nwk
 
