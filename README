@@ -10,7 +10,7 @@ To view the options to be passed to SimBac, run without any arguments or with th
 ./SimBac -h
 
     -N NUM Sets the number of isolates (default is 100)
-    -R NUM Sets the value of θ, the site-specific mutation rate, between 0 and 1 (default is 0.01)
+    -T NUM Sets the value of θ, the site-specific mutation rate, between 0 and 1 (default is 0.01)
     -m NUM Sets the lower bound of site-mutation (divergence) in a region of external recombination, between 0 and 1 (default is 0)
     -M NUM Sets the upper bound of site-mutation (divergence) in a region of external recombination, between 0 and 1 (default is 0)
     -R NUM Sets the site-specific rate of internal (within species) recombination, R_i (default is 0.01)
