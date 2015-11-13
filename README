@@ -1,5 +1,13 @@
 SimBac README
 
+SimBac uses the GNU Scientific Library, which can be installed on Linux Ubuntu by running:
+sudo apt-get install gsl-bin libgsl0-dev libgsl0ldbl
+
+On a Mac, the GNU Scientific Library can be install via Homebrew, running:
+brew install gsl
+
+On Windows, the GNU Scientific library can be obtained through a Cygwin add-on.
+
 To compile SimBac, change to the directory with the source files and run:
 
 g++ *.cpp -lgsl -lgslcblas -lm -O2 -o SimBac
