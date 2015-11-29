@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
     int seed=-1;
     bool am=false;
     vector<int> blocks;
+    blocks.push_back(0);
     blocks.push_back(10000);
     vector<int> gaps;
     int c;
