@@ -160,7 +160,7 @@ void Arg::construct() {
     currentTime+=gsl_ran_exponential(rng,2.0/(k*(k-1)+(2.0*currentRecomb)+(2.0*currentRecombExt)));
     //Randomly choose coalescence or recombination
     double reac_rand = gsl_rng_uniform(rng);
-    if (reac_rand<=(k*(k-1.0))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt))){
+    if (reac_rand<(k*(k-1.0))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt))){
       //Coalescence event
       //Choose two children to coalesce at random
       int i = floor(gsl_rng_uniform(rng)*k);
@@ -256,7 +256,7 @@ void Arg::construct() {
         calc_clonalRecomb(G, delta_ext, probStartExt[i], recombRatesExt[i], *itChildStart1, *itChildEnd1, noStopExt, siteRecombExt, totMaterial[i]);
       }
 
-    }else if (reac_rand<=((2.0*currentRecomb + (k*(k-1.0)))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt)))){
+    }else if (reac_rand<((2.0*currentRecomb + (k*(k-1.0)))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt)))){
       //Internal recombination event
       //Choose a child to undergo recombination weighted by its local recombination rate
       double r_1=gsl_rng_uniform(rng);
@@ -271,6 +271,7 @@ void Arg::construct() {
       list<list<int> >::iterator itParentStart1 = intervalStarts.begin(), itParentEnd1 = intervalEnds.begin();
       advance(itParentStart1,i);
       advance(itParentEnd1,i);
+
       if (clonal[toCoal[i]] == true){
         choose_clonalRecomb(probStart[i], G, *itParentStart1, *itParentEnd1, beg, end, delta, totMaterial[i], recombRates[i]);
       }else{
@@ -412,12 +413,12 @@ Data * Arg::drawData(double theta,double theta_extMin, double theta_extMax) {
       if (s[i][3]>0) {//If there is a second parent, copy the imported fragment
           int beg=s[s[i][3]][4];//Start of import
           int  nd=s[s[i][3]][5];//End of import
-          if (beg <= nd){
+          if (beg < nd){
             //Import contained within genome
-            for (int j=beg;j<=nd;++j) genotypes[i]->at(j)=genotypes[s[i][3]]->at(j);//Copy the genotypes of the second parent for the imported fragment
+            for (int j=beg;j<nd;++j) genotypes[i]->at(j)=genotypes[s[i][3]]->at(j);//Copy the genotypes of the second parent for the imported fragment
           }else{
             //Import wraps around end of genome
-            for (int j=0;j<=nd;++j) genotypes[i]->at(j)=genotypes[s[i][3]]->at(j);
+            for (int j=0;j<nd;++j) genotypes[i]->at(j)=genotypes[s[i][3]]->at(j);
             for (int j=beg;j<L;++j) genotypes[i]->at(j)=genotypes[s[i][3]]->at(j);
           }
           if ((s[s[i][3]][0]<0 || genotypes[s[s[i][3]][0]]!=NULL) && (s[s[i][3]][1]<0 || genotypes[s[s[i][3]][1]]!=NULL)) {
@@ -438,12 +439,12 @@ Data * Arg::drawData(double theta,double theta_extMin, double theta_extMax) {
         int beg = s[i][6];
         int end = s[i][7];
         //Mutate the sites individually
-        if (beg <= end){
-          for (int k=beg;k<=end;++k){
+        if (beg < end){
+          for (int k=beg;k<end;++k){
             if (gsl_rng_uniform(rng) < thetaExt) genotypes[i]->at(k)=(genotypes[i]->at(k)+1+(int)floor(gsl_rng_uniform(rng)*3))%4;
           }
         }else{
-          for (int k=0;k<=end;++k){
+          for (int k=0;k<end;++k){
             if (gsl_rng_uniform(rng) < thetaExt) genotypes[i]->at(k)=(genotypes[i]->at(k)+1+(int)floor(gsl_rng_uniform(rng)*3))%4;
           }
           for (int k=beg;k<L;++k){
@@ -502,10 +503,10 @@ string Arg::extractLT(int site) {
         int beg=s[s[k][3]][4];//Start of import
         int  nd=s[s[k][3]][5];//End of import
         //Set equal to true if the site of interest is included in the imported interval
-        if (beg <= nd){
-          if (site>=beg && site<=nd) s4[s[k][3]]=true;else s4[s[k][2]]=true;
+        if (beg < nd){
+          if (site>=beg && site<nd) s4[s[k][3]]=true;else s4[s[k][2]]=true;
         }else{
-          if ((site <= nd) || (site >= beg)) s4[s[k][3]]=true;else s4[s[k][2]]=true;
+          if ((site < nd) || (site >= beg)) s4[s[k][3]]=true;else s4[s[k][2]]=true;
         }
       }
     }
@@ -513,7 +514,7 @@ string Arg::extractLT(int site) {
 for (int i=n;i<(int)s.size();++i) {
       if (s4[i]==false) continue;//Node not included for site
       if (s[i][2]<0 || s4[s[i][2]]==false) swap(s[i][2],s[i][3]);//If first parent is a leaf or not included, swap parents
-      if (s[i][0]<0 || s4[s[i][0]]==false) swap(s[i][0],s[i][1]);//If first child is a leaf or not include, swap children
+      if (s[i][0]<0 || s4[s[i][0]]==false) swap(s[i][0],s[i][1]);//If first child is a leaf or not included, swap children
       if (s[i][1]<0 || s4[s[i][1]]==false) {//If second child is a leaf or not included
           s4[i]=false;//Set current node to false
           if (s[i][0]>=0) {//If there is a first child now
@@ -528,7 +529,7 @@ for (int i=n;i<(int)s.size();++i) {
   //Find new root
   int ii=s.size()-1;while (s4[ii]==false) --ii;
   if (s[ii][0]<0 || s4[s[ii][0]]==false || s[ii][1]<0 || s4[s[ii][1]]==false) s4[ii]=false;//If children of new root are leaves or not included, remove current root
-  while (s4[ii]==false) ii--;//Fidn new root
+  while (s4[ii]==false) ii--;//Find new root
   //Construct tree from root
   string str=buildTree(ii).append(";");
   s=s2;
@@ -567,18 +568,18 @@ void Arg::outputDOT(ostream * out,bool am) {
         }else if (s[s[i][0]][2]==i){ //recipient
           if (s[s[s[i][0]][3]][4]<=s[s[s[i][0]][3]][5]){
             for (int k=0;k<L;++k) {
-              if (k>=s[s[s[i][0]][3]][4]&&k<=s[s[s[i][0]][3]][5]) ancmat.back()[k]=false;
+              if (k>=s[s[s[i][0]][3]][4]&&k<s[s[s[i][0]][3]][5]) ancmat.back()[k]=false;
             }
           }else{
             for (int k=0;k<L;++k) {
-              if (k<=s[s[s[i][0]][3]][5]||k>=s[s[s[i][0]][3]][4]) ancmat.back()[k]=false;
+              if (k<s[s[s[i][0]][3]][5]||k>=s[s[s[i][0]][3]][4]) ancmat.back()[k]=false;
             }
           }
         }else{//donor
           if (s[i][4] <= s[i][5]){
-            for (int k=0;k<L;++k) {if (k<s[i][4]||k>s[i][5]) ancmat.back()[k]=false;}
+            for (int k=0;k<L;++k) {if (k<s[i][4]||k>=s[i][5]) ancmat.back()[k]=false;}
           }else{
-            for (int k=0;k<L;++k) {if (k>s[i][5]&&k<s[i][4]) ancmat.back()[k]=false;}
+            for (int k=0;k<L;++k) {if (k>=s[i][5]&&k<s[i][4]) ancmat.back()[k]=false;}
           }
         }
       }
@@ -599,12 +600,12 @@ void Arg::outputDOT(ostream * out,bool am) {
       if (s[i][6] >= 0){
         int beg = s[i][6];
         int end = s[i][7];
-        if (beg <= end){
-          for (int k=beg;k<=end;++k){
+        if (beg < end){
+          for (int k=beg;k<end;++k){
             if (ancmat[i][k]) extmat[i][k] = true;
           }
         }else{
-          for (int k=0;k<=end;++k){
+          for (int k=0;k<end;++k){
             if (ancmat[i][k]) extmat[i][k] = true;
           }
           for (int k=beg;k<L;++k){
@@ -693,7 +694,6 @@ void Arg::outputLOCAL(ostream * out) {
       string tree=extractLT(i);
       int n=0;
       while (i+1<changeLT.size() && changeLT[i+1]==false) {++i;++n;}
-      *out<<"["<<n+1<<"]"<<tree<<endl;
       ++i;
       if (i==changeLT.size()) break;
     }
@@ -704,7 +704,7 @@ void Arg::outputBREAKS(ostream * out){
   *out<<"Start\tEnd"<<endl;
   for (size_t i=0;i<s.size();++i){
     if (s[i][4] > 0){
-      *out<<s[i][4]<<"\t"<<s[i][5]<<endl;
+      *out<<s[i][4]<<"\t"<<(s[i][5]-1)<<endl;
     }
   }
 }
@@ -714,7 +714,7 @@ void Arg::outputEBREAKS(ostream * out){
   *out<<"Start\tEnd"<<endl;
   for (size_t i=0;i<s.size();++i){
     if (s[i][6] > 0){
-      *out<<s[i][6]<<"\t"<<s[i][7]<<endl;
+      *out<<s[i][6]<<"\t"<<(s[i][7]-1)<<endl;
     }
   }
 }
