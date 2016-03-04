@@ -694,6 +694,7 @@ void Arg::outputLOCAL(ostream * out) {
       string tree=extractLT(i);
       int n=0;
       while (i+1<changeLT.size() && changeLT[i+1]==false) {++i;++n;}
+      *out<<"["<<n+1<<"]"<<tree<<endl;
       ++i;
       if (i==changeLT.size()) break;
     }
