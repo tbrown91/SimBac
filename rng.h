@@ -38,7 +38,7 @@ void makerng() {
    seed = (unsigned long) time(NULL);
    printf("Got seed %u from time()\n",seed);
  } else {
-   fread(&seed,sizeof(seed),1,devrandom);
+   size_t num = fread(&seed,sizeof(seed),1,devrandom);
    printf("Got seed %u from /dev/urandom\n",seed);
    fclose(devrandom);
  }
