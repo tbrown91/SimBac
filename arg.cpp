@@ -42,7 +42,6 @@ void Arg::construct() {
   clonal.clear(); //Clonal check of all nodes
   int L=blocks.back(); //total number of ancestral sites in the genome
   int b=blocks.size()-1; //Number of blocks
-
   //Length of genome with gaps inserted between each block
   int G = L;
   for (int i=0;i<b;++i) G += gaps[i];
@@ -85,7 +84,6 @@ void Arg::construct() {
   s.push_back(vector<int>(8,-1));
   ages.push_back(0.0);
   clonal.push_back(true);
-
   //Create ancestral intervals
   intervalStarts.push_back(list<int>());
   intervalEnds.push_back(list<int>());
@@ -93,7 +91,6 @@ void Arg::construct() {
     intervalStarts.back().push_back(blockStarts[i]);
     intervalEnds.back().push_back(blockEnds[i]-1);
   }
-
   //Initialise MRCA struct
   list<int>::iterator itStart = (intervalStarts.back()).begin(), itEnd = (intervalEnds.back()).begin();
   ++itStart;
@@ -115,7 +112,6 @@ void Arg::construct() {
     ++itStart;
     ++itEnd;
   }
-
   //Calculate probability of recombination at each site
   probStart.push_back(vector<double>());
   probStartExt.push_back(vector<double>());
@@ -124,7 +120,6 @@ void Arg::construct() {
   totMaterial.push_back(0);
   calc_clonalRecomb(G, delta, probStart.back(), recombRates.back(), intervalStarts.back(), intervalEnds.back(), noStop, siteRecomb, totMaterial.back());
   calc_clonalRecomb(G, delta_ext, probStartExt.back(), recombRatesExt.back(), intervalStarts.back(), intervalEnds.back(), noStopExt, siteRecombExt, totMaterial.back());
-
   //Set values for initial nodes of the ARG
   for (int i=1;i<n;++i){
     toCoal.push_back(i); //Initial nodes are in the ARG
@@ -147,11 +142,11 @@ void Arg::construct() {
     totMaterial.back() = totMaterial[0];
   }
 
-
   double currentTime = 0.0;
 
   //Simulate the coalescence-recombination graph
   while (k>1) {
+    // cout<<"k = "<<k<<endl;
     //Calculate the current rate of recombination
     double currentRecomb = 0.0, currentRecombExt = 0.0;
     for (size_t i=0;i<recombRates.size();++i) currentRecomb += recombRates[i];
@@ -161,6 +156,7 @@ void Arg::construct() {
     //Randomly choose coalescence or recombination
     double reac_rand = gsl_rng_uniform(rng);
     if (reac_rand<(k*(k-1.0))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt))){
+      // cout<<"coal"<<endl;
       //Coalescence event
       //Choose two children to coalesce at random
       int i = floor(gsl_rng_uniform(rng)*k);
@@ -170,6 +166,7 @@ void Arg::construct() {
         i=j;
         j=k-1;
       }
+      // cout<<"children "<<i<<" "<<j<<endl;
       //Create new node
       s.push_back(vector<int>(8,-1));
       //Set two children of new node
@@ -193,9 +190,7 @@ void Arg::construct() {
       advance(itChildEnd2,j);
       int MRCA_check = 0;
       update_MRCA(M, *itChildStart1, *itChildEnd1, *itChildStart2, *itChildEnd2, MRCA_check);
-
       combine_ancestries(*itChildStart1, *itChildEnd1, *itChildStart2, *itChildEnd2);
-
       //Remove the second child from the ARG
       toCoal[j] = toCoal.back();
       toCoal.pop_back();
@@ -215,8 +210,16 @@ void Arg::construct() {
       totMaterial.pop_back();
       --k;
       if (k == 1) continue;
-
       //Find blocks in MRCA struct that have reached a value of one, fully coalesced
+      // M.itStart = (M.starts).begin();
+      // M.itEnd = (M.ends).begin();
+      // M.itValue = (M.values).begin();
+      // while (M.itValue != (M.values).end()){
+      //   cout<<*(M.itStart)<<" "<<*(M.itEnd)<<" "<<*(M.itValue)<<endl;
+      //   ++(M.itStart);
+      //   ++(M.itEnd);
+      //   ++(M.itValue);
+      // }
       if (MRCA_check == 1){
         M.itStart = (M.starts).begin();
         M.itEnd = (M.ends).begin();
@@ -227,26 +230,25 @@ void Arg::construct() {
             M.itStart = (M.starts).erase(M.itStart);//Remove MRCA interval from MRCA struct
             M.itEnd = (M.ends).erase(M.itEnd);
             M.itValue = (M.values).erase(M.itValue);
-            if (M.itValue == (M.values).begin()) continue;//Removed interval is first in the list, cannot merge any intervals
+            if ((M.itValue == (M.values).begin())||(M.itValue == (M.values).end())) continue;//Removed interval is first in the list, cannot merge any intervals
             //Check if the two intervals either side of the removed interval can be merged
             int tempVal = *(M.itValue);
-            --M.itValue;
+            --(M.itValue);
             if (*(M.itValue) == tempVal){
               M.itValue = (M.values).erase(M.itValue);
-              ++M.itValue;
+              ++(M.itValue);
               M.itStart = (M.starts).erase(M.itStart);
-              --M.itEnd;
+              --(M.itEnd);
               M.itEnd = (M.ends).erase(M.itEnd);
-              ++M.itEnd;
-            }else ++M.itValue;
+              ++(M.itEnd);
+            }else ++(M.itValue);
           }else{
-            ++M.itStart;
-            ++M.itEnd;
-            ++M.itValue;
+            ++(M.itStart);
+            ++(M.itEnd);
+            ++(M.itValue);
           }
         }
       }
-
       //Calculate the recombination rate for the new node
       if (clonal[toCoal[i]] == true){
         calc_clonalRecomb(G, delta, probStart[i], recombRates[i], *itChildStart1, *itChildEnd1, noStop, siteRecomb, totMaterial[i]);
@@ -257,6 +259,7 @@ void Arg::construct() {
       }
 
     }else if (reac_rand<((2.0*currentRecomb + (k*(k-1.0)))/(k*(k-1.0)+(2.0*currentRecomb)+(2.0*currentRecombExt)))){
+      // cout<<"Internal recomb"<<endl;
       //Internal recombination event
       //Choose a child to undergo recombination weighted by its local recombination rate
       double r_1=gsl_rng_uniform(rng);
@@ -539,12 +542,12 @@ for (int i=n;i<(int)s.size();++i) {
 string Arg::buildTree(int r) {
   ostringstream stm;
   if (r<n) {
-      stm<<r<<":"<<ages[s[r][2]];
-    }else{
-      stm<<"("<<buildTree(s[r][0])<<","<<buildTree(s[r][1])<<"):";
-      if (s[r][2]<0) stm<<0.0;
-      else stm<<ages[s[r][2]]-ages[r];
-    }
+    stm<<r<<":"<<ages[s[r][2]];
+  }else{
+    stm<<"("<<buildTree(s[r][0])<<","<<buildTree(s[r][1])<<"):";
+    if (s[r][2]<0) stm<<0.0;
+    else stm<<ages[s[r][2]]-ages[r];
+  }
   return stm.str();
 }
 
