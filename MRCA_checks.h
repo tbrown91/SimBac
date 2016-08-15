@@ -111,13 +111,17 @@ void merge_MRCA(Arg::MRCA &M){
   while (M.itValue != (M.values).end()){
     int tempVal = *(M.itValue);
     ++M.itValue;
-    ++M.itStart;
+    if (M.itValue == (M.values).end()){
+      break;
+    }
+    ++(M.itStart);
     if (*(M.itValue) == tempVal){
       M.itStart = (M.starts).erase(M.itStart);
       M.itEnd = (M.ends).erase(M.itEnd);
-      ++(M.itEnd);
       M.itValue = (M.values).erase(M.itValue);
-    }else ++M.itEnd;
+      --(M.itValue);
+      --(M.itStart);
+    }else ++(M.itEnd);
   }
 }
 
