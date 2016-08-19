@@ -38,8 +38,7 @@ static const char * help=
     -o FILE  Export data to given file\n\
     -c FILE  Export clonal genealogy to given file\n\
     -l FILE  Export local trees to given file\n\
-    -b FILE  Write log file of internal recombinant break interval locations\n\
-    -f FILE  Write log file of external recombinant break interval locations\n\
+    -b FILE  Write log file of internal recombinant break interval locations and relevant taxa\n\
     -d FILE  Export DOT graph to given file\n\
     -a       Include ancestral material in the DOT graph\n\
     ";
@@ -95,7 +94,6 @@ int main(int argc, char *argv[]) {
         case('d'):dfile=optarg;break;
         case('o'):ofile=optarg;break;
         case('b'):bfile=optarg;break;
-        case('f'):ffile=optarg;break;
         case '?':cout<<"Wrong arguments: did not recognise "<<c<<" "<<optarg<<endl<<help<<endl;return 1;
         default:abort();
     }
@@ -147,12 +145,6 @@ int main(int argc, char *argv[]) {
     breaks.open(bfile.data());
     arg->outputBREAKS(&breaks);
     breaks.close();}
-    //Write external recombinant breaks to file
-    if (ffile.length()>0) {
-    ofstream e_breaks;
-    e_breaks.open(ffile.data());
-    arg->outputEBREAKS(&e_breaks);
-    e_breaks.close();}
     delete(arg);
     gsl_rng_free(rng);
 }

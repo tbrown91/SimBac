@@ -20,6 +20,7 @@
 #include "recomb_event.h"
 #include "recomb_prob.h"
 #include "MRCA_checks.h"
+#include "track_recombMaterial.h"
 //
 
 Arg::Arg(int n,double rho_site,double rho_extSite,double delta,double delta_ext,vector<int> blocks,vector<int> gaps) {
@@ -569,7 +570,7 @@ void Arg::outputDOT(ostream * out,bool am) {
         if (s[i][1]>=0) {//Father of two sons
           for (int k=0;k<L;++k) ancmat.back()[k]=ancmat[s[i][0]][k]||ancmat[s[i][1]][k];//Include ancestral material of other child
         }else if (s[s[i][0]][2]==i){ //recipient
-          if (s[s[s[i][0]][3]][4]<=s[s[s[i][0]][3]][5]){
+          if (s[s[s[i][0]][3]][4]<s[s[s[i][0]][3]][5]){
             for (int k=0;k<L;++k) {
               if (k>=s[s[s[i][0]][3]][4]&&k<s[s[s[i][0]][3]][5]) ancmat.back()[k]=false;
             }
@@ -579,7 +580,7 @@ void Arg::outputDOT(ostream * out,bool am) {
             }
           }
         }else{//donor
-          if (s[i][4] <= s[i][5]){
+          if (s[i][4] < s[i][5]){
             for (int k=0;k<L;++k) {if (k<s[i][4]||k>=s[i][5]) ancmat.back()[k]=false;}
           }else{
             for (int k=0;k<L;++k) {if (k>=s[i][5]&&k<s[i][4]) ancmat.back()[k]=false;}
@@ -630,6 +631,11 @@ void Arg::outputDOT(ostream * out,bool am) {
           if (s[i][6] > -1) *out<<i+1<<"[shape=point,width=0.10,height=0.10,color=red]"<<endl;//Red node if external
           else if (clonal[i]) *out<<i+1<<"[shape=point,width=0.10,height=0.10]"<<endl;//Black node if clonal
           else *out<<i+1<<"[shape=point,width=0.10,height=0.10,color=gray]"<<endl;//Gray node if non-clonal
+          if (i<n){
+            *out<<i+1<<"->"<<ages.size()+i+1<<"[style=dotted,arrowhead=odot,arrowsize=1];"<<endl;
+            *out<<ages.size()+i+1<<"[shape=plaintext,label=\""<<i<<"\"];"<<endl;
+            *out<<"{rank=same; "<<i+1<<";"<<ages.size()+1+i<<"}"<<endl;
+          }
           continue;
         }
 
@@ -664,7 +670,13 @@ void Arg::outputDOT(ostream * out,bool am) {
         //Draw white border at bottom of box
       *out<<"<tr><td HEIGHT=\"5\" COLSPAN=\""<<floor(ma/skip)+4<<"\" bgcolor=\"white\"></td></tr>";
       *out<<"</table>>]"<<endl;
+      if (i<n){
+        *out<<i+1<<"->"<<ages.size()+i+1<<"[style=dotted,arrowhead=odot,arrowsize=1];"<<endl;
+        *out<<ages.size()+i+1<<"[shape=plaintext,label=\""<<i<<"\"];"<<endl;
+        *out<<"{rank=same; "<<i+1<<";"<<ages.size()+1+i<<"}"<<endl;
+      }
     }
+
 
 //For standard colouring of the edges
   for (unsigned int a=0;a<s.size();++a) {
@@ -705,20 +717,137 @@ void Arg::outputLOCAL(ostream * out) {
 
 void Arg::outputBREAKS(ostream * out){
   *out<<"Internal recombinant intervals" << endl;
-  *out<<"Start\tEnd"<<endl;
-  for (size_t i=0;i<s.size();++i){
-    if (s[i][4] > 0){
-      *out<<s[i][4]<<"\t"<<(s[i][5]-1)<<endl;
+  *out<<"Start\tEnd\tRecipients\tOrigins"<<endl;
+  int L=blocks.back();
+  vector<vector<bool> > extmat;
+  vector<vector<bool> > ancmat;
+  for (int i=0;i<n;i++){ancmat.push_back(vector<bool>(L,true));}
+  //Find internal and external ancestral material for each node
+  for (unsigned int i=n;i<s.size();++i) {
+    //Draw the node with the ancestral material included
+    ancmat.push_back(ancmat[s[i][0]]);
+    if (s[i][6] == -1){//Node is a coalescent or internal recombination event
+      if (s[i][1]>=0) {//Father of two sons
+        for (int k=0;k<L;++k) ancmat.back()[k]=ancmat[s[i][0]][k]||ancmat[s[i][1]][k];//Include ancestral material of other child
+      }else if (s[s[i][0]][2]==i){ //recipient
+        if (s[s[s[i][0]][3]][4]<s[s[s[i][0]][3]][5]){
+          for (int k=0;k<L;++k) {
+            if (k>=s[s[s[i][0]][3]][4]&&k<s[s[s[i][0]][3]][5]) ancmat.back()[k]=false;
+          }
+        }else{
+          for (int k=0;k<L;++k) {
+            if (k<s[s[s[i][0]][3]][5]||k>=s[s[s[i][0]][3]][4]) ancmat.back()[k]=false;
+          }
+        }
+      }else{//donor
+        if (s[i][4] < s[i][5]){
+          for (int k=0;k<L;++k) {if (k<s[i][4]||k>=s[i][5]) ancmat.back()[k]=false;}
+        }else{
+          for (int k=0;k<L;++k) {if (k>=s[i][5]&&k<s[i][4]) ancmat.back()[k]=false;}
+        }
+      }
     }
   }
-}
 
-void Arg::outputEBREAKS(ostream * out){
-  *out<<"External recombinant intervals" << endl;
-  *out<<"Start\tEnd"<<endl;
-  for (size_t i=0;i<s.size();++i){
-    if (s[i][6] > 0){
-      *out<<s[i][6]<<"\t"<<(s[i][7]-1)<<endl;
+  for (unsigned int i=0;i<s.size();++i) extmat.push_back(vector<bool>(L,false));
+  //Add external recombinant intervals to children of external recombinant nodes
+  for (int i=s.size()-2;i>=0;--i){
+    if (s[i][2] >= 0){
+      for (int k=0;k<L;++k){
+        if (ancmat[i][k]) extmat[i][k] = (extmat[i][k] || extmat[s[i][2]][k]);
+      }
     }
+    if (s[i][3] >= 0){
+      for (int k=0;k<L;++k){
+        if (ancmat[i][k]) extmat[i][k] = (extmat[i][k] || extmat[s[i][3]][k]);
+      }
+    }
+    if (s[i][6] >= 0){
+      int beg = s[i][6];
+      int end = s[i][7];
+      if (beg < end){
+        for (int k=beg;k<end;++k){
+          if (ancmat[i][k]) extmat[i][k] = true;
+        }
+      }else{
+        for (int k=0;k<end;++k){
+          if (ancmat[i][k]) extmat[i][k] = true;
+        }
+        for (int k=beg;k<L;++k){
+          if (ancmat[i][k]) extmat[i][k] = true;
+        }
+      }
+    }
+  }
+
+  for (size_t i=0;i<s.size();++i){
+    if (s[i][4] > 0){
+      *out<<s[i][4]<<"\t"<<(s[i][5]-1)<<"\t";
+      // Find recipients of material
+      *out<<"[";
+      vector<int> poss_taxa;
+      for (int it=0;it<n;++it){poss_taxa.push_back(0);}
+      find_taxa(i,n,poss_taxa,s,ancmat,clonal);
+      int it=0;
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<it;
+          ++it;
+          break;
+        }else{++it;}
+      }
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<","<<it;
+          ++it;
+        }else{++it;}
+      }
+      *out<<"]\t";
+
+      // Find origins of material
+      for (int it=0;it<n;++it){poss_taxa[it]=(0);}
+      *out<<"[";
+      find_originTaxa(i,n,poss_taxa,s,ancmat,clonal);
+      it=0;
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<it;
+          ++it;
+          break;
+        }else{++it;}
+      }
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<","<<it;
+          ++it;
+        }else{++it;}
+      }
+      *out<<"]"<<endl;
+    }
+
+    //External
+    if (s[i][6] > 0){
+      *out<<s[i][6]<<"\t"<<(s[i][7]-1)<<"\t";
+      *out<<"[";
+      vector<int> poss_taxa;
+      for (int it=0;it<n;++it){poss_taxa.push_back(0);}
+      find_taxa(i,n,poss_taxa,s,extmat,clonal);
+      int it=0;
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<it;
+          ++it;
+          break;
+        }else{++it;}
+      }
+      while ((size_t)it<poss_taxa.size()){
+        if (poss_taxa[it]==1){
+          *out<<","<<it;
+          ++it;
+        }else{++it;}
+      }
+      *out<<"]"<<"\t[EXTERNAL]"<<endl;
+    }
+
   }
 }
