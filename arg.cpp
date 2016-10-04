@@ -414,7 +414,7 @@ Data * Arg::drawData(double theta,double theta_extMin, double theta_extMax) {
           delete(genotypes[s[i][2]]);
           genotypes[s[i][2]]=&done;
         }
-      if (s[i][3]>0) {//If there is a second parent, copy the imported fragment
+      if (s[i][3]>=0) {//If there is a second parent, copy the imported fragment
           int beg=s[s[i][3]][4];//Start of import
           int  nd=s[s[i][3]][5];//End of import
           if (beg < nd){
@@ -781,7 +781,7 @@ void Arg::outputBREAKS(ostream * out){
   }
 
   for (size_t i=0;i<s.size();++i){
-    if (s[i][4] > 0){
+    if (s[i][4] >= 0){
       *out<<s[i][4]<<"\t"<<(s[i][5]-1)<<"\t";
       // Find recipients of material
       *out<<"[";
@@ -826,7 +826,7 @@ void Arg::outputBREAKS(ostream * out){
     }
 
     //External
-    if (s[i][6] > 0){
+    if (s[i][6] >= 0){
       *out<<s[i][6]<<"\t"<<(s[i][7]-1)<<"\t";
       *out<<"[";
       vector<int> poss_taxa;
