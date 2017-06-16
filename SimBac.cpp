@@ -65,15 +65,14 @@ int main(int argc, char *argv[]) {
     string lfile="";//File to which the local trees are exported
     string dfile="";//File to which the DOT graph is exported
     string ofile="";//File to which the data is exported
-    string bfile="";//File to which internal recombinant intervals are exported
-    string ffile="";//File to which external recombinant intervals are exported
+    string bfile="";//File to which recombinant intervals are exported
     double p1,p2;
     char * pch;
     if (argc == 1){
       cout<<help<<endl;
       return 1;
     }
-    while ((c = getopt (argc, argv, "ahN:T:m:M:R:r:D:e:s:B:G:c:l:d:o:f:b:")) != -1)
+    while ((c = getopt (argc, argv, "ahN:T:m:M:R:r:D:e:s:B:G:c:l:d:o:b:")) != -1)
     switch (c)
     {
         case('N'):n=atoi(optarg);break;
