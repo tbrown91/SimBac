@@ -31,7 +31,9 @@ To view the options to be passed to SimBac, run without any arguments or with th
     -o FILE Name of file to write generated sequences (FASTA format)
     -c FILE Name of file to write clonal genealogy (Newick format)
     -l FILE Name of file to write local trees (Newick format)
-    -b FILE Name of file to write log of recombination break points and origins and recipient lineages of the recombinant material
+    -b FILE Write log file of internal recombinant interval locations
+    -f FILE Write log file of external recombinant interval locations
+    -g FILE Name of file to write log of recombination break points and origins and recipient lineages of the recombinant material (Only recommended for small ARGs)
     -d FILE Name of file to export ancestral recombination graph (DOT file)
     -a Include ancestral material in the DOT graph
 
