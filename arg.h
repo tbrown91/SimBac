@@ -40,7 +40,9 @@ class Arg {
       string extractLT(int site);///<Extracts the local tree at the given site
       void outputDOT(ostream * out,bool am);///<Create a DOT description of the ARG and export it
       void outputLOCAL(ostream * out);///<Export the local trees
-      void outputBREAKS(ostream * out);///<Write recombinant break intervals to log file
+      void outputIBREAKS(ostream * out);///<Write internal recombinant break intervals to log file
+      void outputEBREAKS(ostream * out);///<Write external recombinant break intervals to log file
+      void outputBREAKS(ostream * out);///<Write recombinant break intervals and origins to log file
       static vector<int> makeBlocks(string str) {
         vector<int> v;
         int s=0;

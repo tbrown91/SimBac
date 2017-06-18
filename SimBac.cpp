@@ -38,7 +38,9 @@ static const char * help=
     -o FILE  Export data to given file\n\
     -c FILE  Export clonal genealogy to given file\n\
     -l FILE  Export local trees to given file\n\
-    -b FILE  Write log file of internal recombinant break interval locations and relevant taxa\n\
+    -b FILE  Write log file of internal recombinant break interval locations\n\
+    -f FILE  Write log file of external recombinant break interval locations\n\
+    -g FILE  Write log file of recombinant break interval locations and relevant taxa (Use only recommended for small ARGs)\n\
     -d FILE  Export DOT graph to given file\n\
     -a       Include ancestral material in the DOT graph\n\
     ";
@@ -65,14 +67,16 @@ int main(int argc, char *argv[]) {
     string lfile="";//File to which the local trees are exported
     string dfile="";//File to which the DOT graph is exported
     string ofile="";//File to which the data is exported
-    string bfile="";//File to which recombinant intervals are exported
+    string bfile="";//Log file of internal recombinant intervals
+    string efile="";//Log file of external recombinant intervals
+    string ffile="";//Log file of origins of recombinant intervals
     double p1,p2;
     char * pch;
     if (argc == 1){
       cout<<help<<endl;
       return 1;
     }
-    while ((c = getopt (argc, argv, "ahN:T:m:M:R:r:D:e:s:B:G:c:l:d:o:b:")) != -1)
+    while ((c = getopt (argc, argv, "ahN:T:m:M:R:r:D:e:s:B:G:c:l:d:o:b:f:g")) != -1)
     switch (c)
     {
         case('N'):n=atoi(optarg);break;
@@ -93,6 +97,8 @@ int main(int argc, char *argv[]) {
         case('d'):dfile=optarg;break;
         case('o'):ofile=optarg;break;
         case('b'):bfile=optarg;break;
+        case('f'):efile=optarg;break;
+        case('g'):ffile=optarg;break;
         case '?':cout<<"Wrong arguments: did not recognise "<<c<<" "<<optarg<<endl<<help<<endl;return 1;
         default:abort();
     }
@@ -140,8 +146,20 @@ int main(int argc, char *argv[]) {
     dot.close();}
     //Write internal recombinant breaks to file
     if (bfile.length()>0) {
+    ofstream ibreaks;
+    ibreaks.open(bfile.data());
+    arg->outputIBREAKS(&ibreaks);
+    ibreaks.close();}
+    //Write extenal recombinant breaks to file
+    if (efile.length()>0) {
+    ofstream ebreaks;
+    ebreaks.open(efile.data());
+    arg->outputEBREAKS(&ebreaks);
+    ebreaks.close();}
+    //Write recombinant breaks and origins to file
+    if (ffile.length()>0) {
     ofstream breaks;
-    breaks.open(bfile.data());
+    breaks.open(ffile.data());
     arg->outputBREAKS(&breaks);
     breaks.close();}
     delete(arg);

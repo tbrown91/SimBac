@@ -715,6 +715,56 @@ void Arg::outputLOCAL(ostream * out) {
     }
 }
 
+void Arg::outputIBREAKS(ostream *out){
+  vector<vector<int> > irecomb_breaks;
+  *out<<"Start\tEND"<<endl;
+  for (unsigned int i=0;i<s.size();++i){
+    if (s[i][4]>-1){
+      vector<int> new_interval (2,0);
+      new_interval[0] = s[i][4];
+      new_interval[1] = s[i][5];
+      int unique_check=1;
+      for (unsigned int j=0;j<irecomb_breaks.size();++j){
+        if ((new_interval[0] == irecomb_breaks[j][0])&&(new_interval[1] == irecomb_breaks[j][1])){
+          unique_check = 0;
+          break;
+        }
+      }
+      if (unique_check==1){
+        irecomb_breaks.push_back(vector<int> (2,0));
+        irecomb_breaks.back()[0] = new_interval[0];
+        irecomb_breaks.back()[1] = new_interval[1];
+        *out<<s[i][4]<<"\t"<<s[i][5]<<endl;
+      }
+    }
+  }
+}
+
+void Arg::outputEBREAKS(ostream *out){
+  vector<vector<int> > erecomb_breaks;
+  *out<<"Start\tEND"<<endl;
+  for (unsigned int i=0;i<s.size();++i){
+    if (s[i][6]>-1){
+      vector<int> new_interval (2,0);
+      new_interval[0] = s[i][6];
+      new_interval[1] = s[i][7];
+      int unique_check=1;
+      for (unsigned int j=0;j<erecomb_breaks.size();++j){
+        if ((new_interval[0] == erecomb_breaks[j][0])&&(new_interval[1] == erecomb_breaks[j][1])){
+          unique_check = 0;
+          break;
+        }
+      }
+      if (unique_check==1){
+        erecomb_breaks.push_back(vector<int> (2,0));
+        erecomb_breaks.back()[0] = new_interval[0];
+        erecomb_breaks.back()[1] = new_interval[1];
+        *out<<s[i][6]<<"\t"<<s[i][7]<<endl;
+      }
+    }
+  }
+}
+
 void Arg::outputBREAKS(ostream * out){
   *out<<"Internal recombinant intervals" << endl;
   *out<<"Start\tEnd\tRecipients\tOrigins"<<endl;
